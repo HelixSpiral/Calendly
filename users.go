@@ -3,7 +3,6 @@ package calendly
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"time"
 )
 
@@ -30,12 +29,7 @@ func (cw *CalendlyWrapper) GetCurrentUser() (User, error) {
 	var user User
 	var userResponse userApiResponse
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s%s", cw.baseApiUrl, "users/me"), nil)
-	if err != nil {
-		return user, err
-	}
-
-	resp, err := cw.sendRawReq(req)
+	resp, err := cw.sendGetReq(fmt.Sprintf("%s%s", cw.baseApiUrl, "users/me"))
 	if err != nil {
 		return user, err
 	}
@@ -55,12 +49,7 @@ func (cw *CalendlyWrapper) GetUser(id string) (User, error) {
 	var user User
 	var userResponse userApiResponse
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s%s%s", cw.baseApiUrl, "users/", id), nil)
-	if err != nil {
-		return user, err
-	}
-
-	resp, err := cw.sendRawReq(req)
+	resp, err := cw.sendGetReq(fmt.Sprintf("%s%s%s", cw.baseApiUrl, "users/", id))
 	if err != nil {
 		return user, err
 	}

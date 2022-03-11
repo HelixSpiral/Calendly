@@ -22,6 +22,20 @@ func New(apiKey string) *CalendlyWrapper {
 	return cw
 }
 
+func (cw *CalendlyWrapper) sendGetReq(url string) ([]byte, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := cw.sendRawReq(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
 func (cw *CalendlyWrapper) sendRawReq(req *http.Request) ([]byte, error) {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", cw.apiKey))
