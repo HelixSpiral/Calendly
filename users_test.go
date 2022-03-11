@@ -33,6 +33,7 @@ func TestGettUser(t *testing.T) {
 			"Prefer": "code=200",
 		},
 	})
+
 	user, err := cw.GetUser("AAAAAAAAAAAAAAAA")
 	if err != nil {
 		t.Fatal("Failed to get user:", err)
