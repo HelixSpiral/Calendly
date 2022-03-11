@@ -22,8 +22,6 @@ func TestGetCurrentUser(t *testing.T) {
 	if currentUser.Name != "John Doe" {
 		t.Fatalf("Expected 'John Doe', received '%s'", currentUser.Name)
 	}
-
-	t.Log(currentUser)
 }
 
 func TestGettUser(t *testing.T) {
