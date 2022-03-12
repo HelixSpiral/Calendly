@@ -1,6 +1,7 @@
 package calendly
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -53,6 +54,20 @@ func (cw *CalendlyWrapper) sendGetReq(url string) ([]byte, error) {
 	return resp, nil
 }
 
+func (cw *CalendlyWrapper) sendPostReq(url string, payload []byte) ([]byte, error) {
+	req, err := http.NewRequest("POST", url, bytes.NewReader(payload))
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := cw.sendRawReq(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
 func (cw *CalendlyWrapper) sendRawReq(req *http.Request) ([]byte, error) {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", cw.apiKey))
@@ -65,7 +80,7 @@ func (cw *CalendlyWrapper) sendRawReq(req *http.Request) ([]byte, error) {
 		return nil, err
 	}
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != 200 && resp.StatusCode != 201 {
 		return nil, fmt.Errorf("status code: %d", resp.StatusCode)
 	}
 
