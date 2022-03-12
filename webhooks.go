@@ -75,18 +75,10 @@ type ListWebhookSubscriptionsInput struct {
 	User         string
 }
 
-type listWebhookSubscriptionsResponse struct {
-	Collection []WebhookSubscription `json:"collection"`
-}
-
-type webhookSubscriptionResponse struct {
-	Resource WebhookSubscription `json:"resource"`
-}
-
 // ListWebhookSubscriptions lists the webhook subscriptions for the provided user or organization
 func (cw *CalendlyWrapper) ListWebhookSubscriptions(input *ListWebhookSubscriptionsInput) ([]WebhookSubscription, error) {
-	var wsr listWebhookSubscriptionsResponse
 	var ws []WebhookSubscription
+	var wsr map[string]json.RawMessage
 
 	url := fmt.Sprintf("%s%s", cw.baseApiUrl, "webhook_subscriptions")
 
@@ -126,7 +118,10 @@ func (cw *CalendlyWrapper) ListWebhookSubscriptions(input *ListWebhookSubscripti
 		return ws, err
 	}
 
-	ws = wsr.Collection
+	err = json.Unmarshal(wsr["collection"], &ws)
+	if err != nil {
+		return ws, err
+	}
 
 	return ws, nil
 }
@@ -134,7 +129,7 @@ func (cw *CalendlyWrapper) ListWebhookSubscriptions(input *ListWebhookSubscripti
 // GetWebhookSubscription gets the webhook subscription by id
 func (cw *CalendlyWrapper) GetWebhookSubscription(id string) (WebhookSubscription, error) {
 	var ws WebhookSubscription
-	var wsr webhookSubscriptionResponse
+	var wsr map[string]WebhookSubscription
 
 	url := fmt.Sprintf("%s%s%s", cw.baseApiUrl, "webhook_subscriptions/", id)
 
@@ -148,7 +143,7 @@ func (cw *CalendlyWrapper) GetWebhookSubscription(id string) (WebhookSubscriptio
 		return ws, err
 	}
 
-	ws = wsr.Resource
+	ws = wsr["resource"]
 
 	return ws, nil
 }

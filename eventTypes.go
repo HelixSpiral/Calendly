@@ -7,11 +7,6 @@ import (
 	"time"
 )
 
-// EventTypeResponse holds the response from the Calendly EventType endpoint
-type eventTypeResponse struct {
-	Resource EventType `json:"resource"`
-}
-
 // EventType holds a Calendly EventType object
 type EventType struct {
 	URI              string           `json:"uri"`
@@ -123,7 +118,7 @@ func (cw *CalendlyWrapper) ListUsersEventTypes(input *ListUsersEventTypesInput) 
 // GetEventType returns the event type for the given id
 func (cw *CalendlyWrapper) GetEventType(id string) (EventType, error) {
 	var et EventType
-	var eventTypeResponse eventTypeResponse
+	var eventTypeResponse map[string]EventType
 
 	resp, err := cw.sendGetReq(fmt.Sprintf("%s%s%s", cw.baseApiUrl, "event_types/", id))
 	if err != nil {
@@ -135,7 +130,7 @@ func (cw *CalendlyWrapper) GetEventType(id string) (EventType, error) {
 		return et, err
 	}
 
-	et = eventTypeResponse.Resource
+	et = eventTypeResponse["resource"]
 
 	return et, nil
 }

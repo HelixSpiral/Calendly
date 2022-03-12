@@ -84,26 +84,6 @@ type Payment struct {
 	Successful bool    `json:"successful"`
 }
 
-// getEventResponse is the Calendly get event response from their API
-type getEventResponse struct {
-	Resource Event `json:"resource"`
-}
-
-// getEventInviteeResponse is the Calendly get event invitee response
-type getEventInviteeResponse struct {
-	Resource Invitee `json:"resource"`
-}
-
-// listEventsResponse is the Calendly list events response from their API
-type listEventsResponse struct {
-	Collection []Event `json:"collection"`
-}
-
-// listEventInviteesResponse is the Calendly list event invitees response from their API
-type listEventInviteesResponse struct {
-	Collection []Invitee `json:"collection"`
-}
-
 type ListEventInviteesInput struct {
 	ID        string
 	Count     int
@@ -128,7 +108,7 @@ type ListEventsInput struct {
 // ListEventInvitees lists all the invitees for a specific event
 func (cw *CalendlyWrapper) ListEventInvitees(input *ListEventInviteesInput) ([]Invitee, error) {
 	var invList []Invitee
-	var invListResp listEventInviteesResponse
+	var invListResp map[string]json.RawMessage
 
 	if input.ID == "" {
 		return invList, fmt.Errorf("you must provide an ID")
@@ -170,7 +150,10 @@ func (cw *CalendlyWrapper) ListEventInvitees(input *ListEventInviteesInput) ([]I
 		return invList, err
 	}
 
-	invList = invListResp.Collection
+	err = json.Unmarshal(invListResp["collection"], &invList)
+	if err != nil {
+		return invList, err
+	}
 
 	return invList, nil
 }
@@ -178,7 +161,7 @@ func (cw *CalendlyWrapper) ListEventInvitees(input *ListEventInviteesInput) ([]I
 // ListEvents returns an event list from the Calendly API
 func (cw *CalendlyWrapper) ListEvents(input *ListEventsInput) ([]Event, error) {
 	var events []Event
-	var eventsResponse listEventsResponse
+	var eventsResponse map[string]json.RawMessage
 
 	url := fmt.Sprintf("%s/scheduled_events", cw.baseApiUrl)
 
@@ -232,7 +215,10 @@ func (cw *CalendlyWrapper) ListEvents(input *ListEventsInput) ([]Event, error) {
 		return events, err
 	}
 
-	events = eventsResponse.Collection
+	err = json.Unmarshal(eventsResponse["collection"], &events)
+	if err != nil {
+		return events, err
+	}
 
 	return events, nil
 }
@@ -240,7 +226,7 @@ func (cw *CalendlyWrapper) ListEvents(input *ListEventsInput) ([]Event, error) {
 // GetEventInvitee returns an invitee for a specific event
 func (cw *CalendlyWrapper) GetEventInvitee(eventid, inviteeid string) (Invitee, error) {
 	var inv Invitee
-	var invResp getEventInviteeResponse
+	var invResp map[string]Invitee
 
 	resp, err := cw.sendGetReq(fmt.Sprintf("%sscheduled_events/%s/invitees/%s", cw.baseApiUrl, eventid, inviteeid))
 	if err != nil {
@@ -252,7 +238,7 @@ func (cw *CalendlyWrapper) GetEventInvitee(eventid, inviteeid string) (Invitee, 
 		return inv, err
 	}
 
-	inv = invResp.Resource
+	inv = invResp["resource"]
 
 	return inv, nil
 }
@@ -260,7 +246,7 @@ func (cw *CalendlyWrapper) GetEventInvitee(eventid, inviteeid string) (Invitee, 
 // GetEvent gets the specified Calendly event
 func (cw *CalendlyWrapper) GetEvent(id string) (Event, error) {
 	var event Event
-	var eventResponse getEventResponse
+	var eventResponse map[string]Event
 
 	resp, err := cw.sendGetReq(fmt.Sprintf("%sscheduled_events/%s", cw.baseApiUrl, id))
 	if err != nil {
@@ -272,7 +258,7 @@ func (cw *CalendlyWrapper) GetEvent(id string) (Event, error) {
 		return event, err
 	}
 
-	event = eventResponse.Resource
+	event = eventResponse["resource"]
 
 	return event, nil
 }

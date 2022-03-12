@@ -20,14 +20,10 @@ type User struct {
 	CurrentOrganization string    `json:"current_organization"`
 }
 
-type userApiResponse struct {
-	Resource User `json:"resource"`
-}
-
 // GetCurrentUser returns the current user for the given API key
 func (cw *CalendlyWrapper) GetCurrentUser() (User, error) {
 	var user User
-	var userResponse userApiResponse
+	var userResponse map[string]User
 
 	resp, err := cw.sendGetReq(fmt.Sprintf("%s%s", cw.baseApiUrl, "users/me"))
 	if err != nil {
@@ -39,7 +35,7 @@ func (cw *CalendlyWrapper) GetCurrentUser() (User, error) {
 		return user, err
 	}
 
-	user = userResponse.Resource
+	user = userResponse["resource"]
 
 	return user, nil
 }
@@ -47,7 +43,7 @@ func (cw *CalendlyWrapper) GetCurrentUser() (User, error) {
 // GetUser gets a user by ID
 func (cw *CalendlyWrapper) GetUser(id string) (User, error) {
 	var user User
-	var userResponse userApiResponse
+	var userResponse map[string]User
 
 	resp, err := cw.sendGetReq(fmt.Sprintf("%s%s%s", cw.baseApiUrl, "users/", id))
 	if err != nil {
@@ -59,7 +55,7 @@ func (cw *CalendlyWrapper) GetUser(id string) (User, error) {
 		return user, err
 	}
 
-	user = userResponse.Resource
+	user = userResponse["resource"]
 
 	return user, nil
 }
