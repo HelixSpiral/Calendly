@@ -20,6 +20,7 @@ type Event struct {
 	UpdatedAt        time.Time          `json:"updated_at"`
 	EventMemberships []EventMemberships `json:"event_memberships"`
 	EventGuests      []Guest            `json:"event_guests"`
+	Cancellation     Cancellation       `json:"cancellation"`
 }
 
 type Location struct {
@@ -71,8 +72,9 @@ type Invitee struct {
 }
 
 type Cancellation struct {
-	CanceledBy string `json:"canceled_by"`
-	Reason     string `json:"reason"`
+	CancelerType string `json:"canceler_type"`
+	CanceledBy   string `json:"canceled_by"`
+	Reason       string `json:"reason"`
 }
 
 type Payment struct {

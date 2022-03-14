@@ -1,6 +1,9 @@
 package calendly
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -42,12 +45,19 @@ type Payload struct {
 	UpdatedAt           time.Time                   `json:"updated_at"`
 	URI                 string                      `json:"uri"`
 	Canceled            bool                        `json:"canceled"`
+	Cancellation        Cancellation                `json:"cancellation"`
 }
 
 type CustomQuestionsAndAnswers struct {
 	Answer   string `json:"answer"`
 	Position int    `json:"position"`
 	Question string `json:"question"`
+}
+
+// WebhookSignature holds a Calendly webhook signature
+type WebhookSignature struct {
+	Time int64
+	V1   string
 }
 
 // WebhookSubscription holds a Calendly Webhook Subscription object
@@ -146,4 +156,20 @@ func (cw *CalendlyWrapper) GetWebhookSubscription(id string) (WebhookSubscriptio
 	ws = wsr["resource"]
 
 	return ws, nil
+}
+
+// VerifyWebhookSignature verifies the given webhook signature
+func (cw *CalendlyWrapper) VerifyWebhookSignature(body, secret []byte, sig *WebhookSignature) (bool, error) {
+	signedPayload := fmt.Sprintf("%d.%s", sig.Time, body)
+
+	h := hmac.New(sha256.New, secret)
+	h.Write([]byte(signedPayload))
+
+	sha := hex.EncodeToString(h.Sum(nil))
+
+	if sig.V1 == sha {
+		return true, nil
+	}
+
+	return false, nil
 }
